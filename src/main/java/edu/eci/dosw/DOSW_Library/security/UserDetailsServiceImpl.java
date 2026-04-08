@@ -1,6 +1,6 @@
 package edu.eci.dosw.DOSW_Library.security;
 
-import edu.eci.dosw.DOSW_Library.persistence.repository.UserRepository;
+import edu.eci.dosw.DOSW_Library.core.repository.UserRepositoryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,16 +12,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var entity = userRepository.findByUsername(username)
+        var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        return User.withUsername(entity.getUsername())
-                .password(entity.getPassword())
-                .roles(entity.getRole().name())
+        return User.withUsername(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.isLibrarian() ? "LIBRARIAN" : "USER")
                 .build();
     }
 }

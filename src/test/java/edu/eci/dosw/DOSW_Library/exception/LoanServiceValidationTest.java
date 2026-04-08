@@ -3,7 +3,7 @@ package edu.eci.dosw.DOSW_Library.service;
 import edu.eci.dosw.DOSW_Library.core.service.BookService;
 import edu.eci.dosw.DOSW_Library.core.service.LoanService;
 import edu.eci.dosw.DOSW_Library.core.service.UserService;
-import edu.eci.dosw.DOSW_Library.persistence.repository.LoanRepository;
+import edu.eci.dosw.DOSW_Library.persistence.relational.repository.LoanRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
