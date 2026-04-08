@@ -2,7 +2,7 @@ package edu.eci.dosw.DOSW_Library.service;
 
 import edu.eci.dosw.DOSW_Library.core.model.User;
 import edu.eci.dosw.DOSW_Library.core.service.UserService;
-import edu.eci.dosw.DOSW_Library.persistence.repository.UserRepository;
+import edu.eci.dosw.DOSW_Library.persistence.relational.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

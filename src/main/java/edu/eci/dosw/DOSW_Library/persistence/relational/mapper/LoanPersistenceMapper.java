@@ -1,9 +1,9 @@
-package edu.eci.dosw.DOSW_Library.persistence.mapper;
+package edu.eci.dosw.DOSW_Library.persistence.relational.mapper;
 
 import edu.eci.dosw.DOSW_Library.core.model.Loan;
 import edu.eci.dosw.DOSW_Library.core.model.LoanStatus;
-import edu.eci.dosw.DOSW_Library.persistence.entity.LoanEntity;
-import edu.eci.dosw.DOSW_Library.persistence.entity.LoanStatusEntity;
+import edu.eci.dosw.DOSW_Library.persistence.relational.entity.LoanEntity;
+import edu.eci.dosw.DOSW_Library.persistence.relational.entity.LoanStatusEntity;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass

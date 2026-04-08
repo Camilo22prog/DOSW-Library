@@ -3,12 +3,11 @@ package edu.eci.dosw.DOSW_Library.core.service;
 import edu.eci.dosw.DOSW_Library.core.exception.BookNotAvailableException;
 import edu.eci.dosw.DOSW_Library.core.exception.LoadLimitExceededException;
 import edu.eci.dosw.DOSW_Library.core.exception.LoanNotFoundException;
-import edu.eci.dosw.DOSW_Library.core.model.*;
+import edu.eci.dosw.DOSW_Library.core.model.Loan;
+import edu.eci.dosw.DOSW_Library.core.model.LoanStatus;
+import edu.eci.dosw.DOSW_Library.core.repository.LoanRepositoryPort;
 import edu.eci.dosw.DOSW_Library.core.util.IdGeneratorUtil;
 import edu.eci.dosw.DOSW_Library.core.validator.LoanValidator;
-import edu.eci.dosw.DOSW_Library.persistence.entity.LoanStatusEntity;
-import edu.eci.dosw.DOSW_Library.persistence.mapper.LoanPersistenceMapper;
-import edu.eci.dosw.DOSW_Library.persistence.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -25,7 +24,7 @@ public class LoanService {
 
     private static final int MAX_LOANS_PER_USER = 3;
 
-    private final LoanRepository loanRepository;
+    private final LoanRepositoryPort loanRepository; // ← PORT
     private final BookService bookService;
     private final UserService userService;
 
@@ -36,7 +35,8 @@ public class LoanService {
         var user = userService.getUserById(userId);
         var book = bookService.getBookById(bookId);
 
-        long activeLoans = loanRepository.countByUserIdAndStatus(userId, LoanStatusEntity.ACTIVE);
+        // Usamos LoanStatus de dominio, no LoanStatusEntity
+        long activeLoans = loanRepository.countByUserIdAndStatus(userId, LoanStatus.ACTIVE);
         if (activeLoans >= MAX_LOANS_PER_USER) {
             throw new LoadLimitExceededException(userId);
         }
@@ -55,43 +55,47 @@ public class LoanService {
                 .status(LoanStatus.ACTIVE)
                 .build();
 
-        var saved = loanRepository.save(LoanPersistenceMapper.toEntity(loan));
+        var saved = loanRepository.save(loan); // el port hace el mapeo internamente
         log.info("Préstamo creado: usuario '{}' tomó el libro '{}'.", userId, bookId);
-        return LoanPersistenceMapper.toDomain(saved);
+        return saved;
     }
 
     @Transactional
     public Loan returnLoan(String loanId, String callerId, boolean isLibrarian) {
         LoanValidator.validateReturnRequest(loanId);
 
-        var entity = loanRepository.findByIdAndStatus(loanId, LoanStatusEntity.ACTIVE)
+        // Buscamos en dominio con LoanStatus.ACTIVE, no LoanStatusEntity
+        var loan = loanRepository.findByIdAndStatus(loanId, LoanStatus.ACTIVE)
                 .orElseThrow(() -> new LoanNotFoundException(loanId));
 
-        if (!isLibrarian && !entity.getUser().getId().equals(callerId)) {
+        if (!isLibrarian && !loan.getUser().getId().equals(callerId)) {
             throw new AccessDeniedException("No tienes permisos para devolver un préstamo ajeno");
         }
 
-        entity.setStatus(LoanStatusEntity.RETURNED);
-        entity.setReturnDate(LocalDate.now());
-        var saved = loanRepository.save(entity);
+        // Mutamos el dominio, no la entidad
+        var returned = Loan.builder()
+                .id(loan.getId())
+                .book(loan.getBook())
+                .user(loan.getUser())
+                .loanDate(loan.getLoanDate())
+                .returnDate(LocalDate.now())
+                .status(LoanStatus.RETURNED)
+                .build();
 
-        bookService.incrementCopy(entity.getBook().getId());
+        var saved = loanRepository.save(returned);
+        bookService.incrementCopy(loan.getBook().getId());
         log.info("Préstamo '{}' devuelto.", loanId);
-        return LoanPersistenceMapper.toDomain(saved);
+        return saved;
     }
 
     @Transactional(readOnly = true)
     public List<Loan> getAllLoans() {
-        return loanRepository.findAll().stream()
-                .map(LoanPersistenceMapper::toDomain)
-                .toList();
+        return loanRepository.findAll();
     }
 
     @Transactional(readOnly = true)
     public List<Loan> getLoansByUser(String userId) {
-        userService.getUserById(userId);
-        return loanRepository.findByUserId(userId).stream()
-                .map(LoanPersistenceMapper::toDomain)
-                .toList();
+        userService.getUserById(userId); // valida que el usuario exista
+        return loanRepository.findByUserId(userId);
     }
 }

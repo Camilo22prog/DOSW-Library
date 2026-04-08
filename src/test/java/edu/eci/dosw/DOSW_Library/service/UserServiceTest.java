@@ -3,10 +3,8 @@ package edu.eci.dosw.DOSW_Library.service;
 import edu.eci.dosw.DOSW_Library.core.exception.UserNotFoundException;
 import edu.eci.dosw.DOSW_Library.core.exception.UsernameAlreadyExistsException;
 import edu.eci.dosw.DOSW_Library.core.model.User;
+import edu.eci.dosw.DOSW_Library.core.repository.UserRepositoryPort;
 import edu.eci.dosw.DOSW_Library.core.service.UserService;
-import edu.eci.dosw.DOSW_Library.persistence.entity.UserEntity;
-import edu.eci.dosw.DOSW_Library.persistence.entity.UserRole;
-import edu.eci.dosw.DOSW_Library.persistence.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +24,7 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepositoryPort userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -38,18 +36,12 @@ class UserServiceTest {
         return User.builder().id(id).name(name).username(username).password(password).build();
     }
 
-    private UserEntity buildEntity(String id, String name, String username) {
-        return UserEntity.builder().id(id).name(name).username(username)
-                .password("pass").role(UserRole.USER).build();
-    }
-
     @Test
     void testRegisterUser_success() {
         var user = buildUser("U1", "Alice", "alice", "pass123");
-        var entity = buildEntity("U1", "Alice", "alice");
         when(userRepository.existsByUsername("alice")).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPass");
-        when(userRepository.save(any())).thenReturn(entity);
+        when(userRepository.save(any())).thenReturn(buildUser("U1", "Alice", "alice", "encodedPass"));
 
         var result = userService.registerUser(user);
 
@@ -93,8 +85,8 @@ class UserServiceTest {
     @Test
     void testGetAllUsers_returnsList() {
         when(userRepository.findAll()).thenReturn(List.of(
-                buildEntity("U1", "Alice", "alice"),
-                buildEntity("U2", "Bob", "bob")
+                buildUser("U1", "Alice", "alice", "p"),
+                buildUser("U2", "Bob", "bob", "p")
         ));
         assertEquals(2, userService.getAllUsers().size());
     }
@@ -108,7 +100,7 @@ class UserServiceTest {
     @Test
     void testGetUserById_found() {
         when(userRepository.findById("U1"))
-                .thenReturn(Optional.of(buildEntity("U1", "Alice", "alice")));
+                .thenReturn(Optional.of(buildUser("U1", "Alice", "alice", "p")));
         assertEquals("Alice", userService.getUserById("U1").getName());
     }
 

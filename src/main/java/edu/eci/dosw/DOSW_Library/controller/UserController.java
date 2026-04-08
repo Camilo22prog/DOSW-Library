@@ -22,8 +22,8 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDTO> registerUser(@RequestBody UserDTO dto) {
         var user = UserMapper.toEntity(dto);
-        userService.registerUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDTO(user));
+        var saved = userService.registerUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.toDTO(saved));
     }
 
     @GetMapping

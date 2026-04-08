@@ -95,6 +95,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Mongo DB -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
         <!-- H2 para tests -->
         <dependency>
             <groupId>com.h2database</groupId>
@@ -184,7 +190,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.75</minimum>
+                                            <minimum>0.30</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

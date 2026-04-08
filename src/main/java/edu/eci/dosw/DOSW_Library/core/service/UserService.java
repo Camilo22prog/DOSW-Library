@@ -3,9 +3,8 @@ package edu.eci.dosw.DOSW_Library.core.service;
 import edu.eci.dosw.DOSW_Library.core.exception.UserNotFoundException;
 import edu.eci.dosw.DOSW_Library.core.exception.UsernameAlreadyExistsException;
 import edu.eci.dosw.DOSW_Library.core.model.User;
+import edu.eci.dosw.DOSW_Library.core.repository.UserRepositoryPort;
 import edu.eci.dosw.DOSW_Library.core.validator.UserValidator;
-import edu.eci.dosw.DOSW_Library.persistence.mapper.UserPersistenceMapper;
-import edu.eci.dosw.DOSW_Library.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepository; // ← PORT
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -30,23 +29,33 @@ public class UserService {
             throw new UsernameAlreadyExistsException(user.getUsername());
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        var saved = userRepository.save(UserPersistenceMapper.toEntity(user));
-        log.info("Usuario '{}' registrado con ID '{}'.", user.getName(), user.getId());
-        return UserPersistenceMapper.toDomain(saved);
+        var userToSave = User.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .username(user.getUsername())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .librarian(user.isLibrarian())   // ← boolean, no enum
+                .build();
+
+        var saved = userRepository.save(userToSave);
+        log.info("Usuario '{}' registrado con ID '{}'.", user.getName(), saved.getId());
+        return saved;
     }
 
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(UserPersistenceMapper::toDomain)
-                .toList();
+        return userRepository.findAll();
     }
 
     @Transactional(readOnly = true)
     public User getUserById(String id) {
         return userRepository.findById(id)
-                .map(UserPersistenceMapper::toDomain)
                 .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
     }
 }

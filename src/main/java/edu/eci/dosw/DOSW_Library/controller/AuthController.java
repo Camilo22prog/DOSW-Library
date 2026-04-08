@@ -2,7 +2,7 @@ package edu.eci.dosw.DOSW_Library.controller;
 
 import edu.eci.dosw.DOSW_Library.controller.dto.LoginRequest;
 import edu.eci.dosw.DOSW_Library.controller.dto.LoginResponse;
-import edu.eci.dosw.DOSW_Library.persistence.repository.UserRepository;
+import edu.eci.dosw.DOSW_Library.core.repository.UserRepositoryPort;
 import edu.eci.dosw.DOSW_Library.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
+    private final UserRepositoryPort userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
@@ -29,9 +29,8 @@ public class AuthController {
         );
 
         var user = userRepository.findByUsername(request.getUsername()).orElseThrow();
-        String token = jwtTokenProvider.generateToken(
-            user.getId(), user.getUsername(), user.getRole().name()
-        );
+        String role = user.isLibrarian() ? "LIBRARIAN" : "USER";
+        String token = jwtTokenProvider.generateToken(user.getId(), user.getUsername(), role);
 
         return ResponseEntity.ok(new LoginResponse(token));
     }

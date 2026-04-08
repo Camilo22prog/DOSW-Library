@@ -17,12 +17,15 @@ public class UserMapper {
     }
 
     public User toEntity(UserDTO dto) {
+        boolean isLibrarian = dto.getLibrarian() != null
+                ? dto.getLibrarian()
+                : "LIBRARIAN".equalsIgnoreCase(dto.getRole());
         return User.builder()
                 .id(dto.getId())
                 .name(dto.getName())
                 .username(dto.getUsername())
                 .password(dto.getPassword())
-                .librarian("LIBRARIAN".equalsIgnoreCase(dto.getRole()))
+                .librarian(isLibrarian)
                 .build();
     }
 }
