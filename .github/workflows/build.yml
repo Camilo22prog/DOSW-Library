@@ -170,8 +170,8 @@ jobs:
           echo "SCM URL: $SCM_URL"
           echo "Desplegando $JAR..."
             
-          curl -X POST \
-            "https://$SCM_URL/api/wardeploy" \
+          curl -X PUT \
+            "https://$SCM_URL/api/onedeploy?type=jar" \
             -u "$USER:$PASS" \
             -H "Content-Type: application/octet-stream" \
             --data-binary @$JAR \
