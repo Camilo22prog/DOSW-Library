@@ -168,7 +168,7 @@ jobs:
         run: |
           curl -T target/app.jar \
             "ftps://waws-prod-bn1-253.ftp.azurewebsites.windows.net/site/wwwroot/app.jar" \
-            -u "${{ secrets.AZURE_FTP_USER }}:${{ secrets.AZURE_FTP_PASS }}" \
+            -u '${{ secrets.AZURE_FTP_USER }}:${{ secrets.AZURE_FTP_PASS }}' \
             --ftp-ssl \
             --ssl-no-revoke \
             -v \
