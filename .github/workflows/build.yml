@@ -160,7 +160,7 @@ jobs:
 
       - name: Deploy via Kudu API
         env:
-            PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         run: |
           USER=$(echo $PUBLISH_PROFILE | grep -oP '(?<=userName=")[^"]+' | head -1)
           PASS=$(echo $PUBLISH_PROFILE | grep -oP '(?<=userPWD=")[^"]+' | head -1)
@@ -168,15 +168,11 @@ jobs:
           JAR=$(ls target/*.jar | grep -v original | head -1)
             
           echo "SCM URL: $SCM_URL"
-          echo "Desplegando $JAR..."
-            
-          cp "$JAR" app.jar
-          zip deployment.zip app.jar
-
+           echo "Desplegando $JAR..."
+          
           curl -X POST \
-            "https://$SCM_URL/api/zipdeploy" \
+            "https://$SCM_URL/api/onedeploy?type=jar" \
             -u "$USER:$PASS" \
-            -H "Content-Type: application/zip" \
-            --data-binary @deployment.zip \
-            --fail \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @$JAR \
             -w "\nHTTP Status: %{http_code}\n"
