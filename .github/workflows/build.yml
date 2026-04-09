@@ -160,19 +160,20 @@ jobs:
 
       - name: Deploy via Kudu API
         env:
-          PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+            PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         run: |
           USER=$(echo $PUBLISH_PROFILE | grep -oP '(?<=userName=")[^"]+' | head -1)
           PASS=$(echo $PUBLISH_PROFILE | grep -oP '(?<=userPWD=")[^"]+' | head -1)
+          SCM_URL=$(echo $PUBLISH_PROFILE | grep -oP '(?<=publishUrl=")[^"]+' | head -1)
           JAR=$(ls target/*.jar | grep -v original | head -1)
             
-          echo "Usuario: $USER"
+          echo "SCM URL: $SCM_URL"
           echo "Desplegando $JAR..."
             
           curl -X POST \
-             "https://dosw-library--axbyasfrh8hbdhfv.scm.azurewebsites.net/api/wardeploy" \
-             -u "$USER:$PASS" \
-             -H "Content-Type: application/octet-stream" \
-             --data-binary @$JAR \
-             --fail \
-             -w "\nHTTP Status: %{http_code}\n"
+            "https://$SCM_URL/api/wardeploy" \
+            -u "$USER:$PASS" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @$JAR \
+            --fail \
+            -w "\nHTTP Status: %{http_code}\n"
