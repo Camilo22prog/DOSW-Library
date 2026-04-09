@@ -166,6 +166,31 @@ jobs:
       - name: Build JAR
         run: mvn clean package -DskipTests -B
 
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+      - name: Configure App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'dosw-library-'
+          app-settings-json: |
+            [
+              {
+                "name": "SPRING_PROFILES_ACTIVE",
+                "value": "mongo"
+              },
+              {
+                "name": "SPRING_DATA_MONGODB_URI",
+                "value": "${{ secrets.MONGODB_URI }}"
+              },
+              {
+                "name": "WEBSITE_RUN_FROM_PACKAGE",
+                "value": "0"
+              }
+            ]
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
