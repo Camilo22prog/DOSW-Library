@@ -170,10 +170,13 @@ jobs:
           echo "SCM URL: $SCM_URL"
           echo "Desplegando $JAR..."
             
-          curl -X PUT \
-            "https://$SCM_URL/api/onedeploy?type=jar" \
+          cp "$JAR" app.jar
+          zip deployment.zip app.jar
+
+          curl -X POST \
+            "https://$SCM_URL/api/zipdeploy" \
             -u "$USER:$PASS" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @$JAR \
+            -H "Content-Type: application/zip" \
+            --data-binary @deployment.zip \
             --fail \
             -w "\nHTTP Status: %{http_code}\n"
