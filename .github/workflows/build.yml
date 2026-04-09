@@ -132,8 +132,8 @@ jobs:
           echo "========================================"
           ls -la jacoco-report/ || echo "Sin reporte disponible"
 
-    # ─────────────────────────────────────────────
-  # JOB 4: DEPLOY — Azure App Service via Kudu
+  # ─────────────────────────────────────────────
+  # JOB 4: DEPLOY — Azure App Service via FTP
   # ─────────────────────────────────────────────
   deploy:
     name: Deploy
@@ -158,21 +158,18 @@ jobs:
       - name: Build JAR
         run: mvn clean package -DskipTests -B
 
-      - name: Deploy via Kudu API
-        env:
-          PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+      - name: Renombrar JAR
         run: |
-          USER=$(echo $PUBLISH_PROFILE | grep -oP '(?<=userName=")[^"]+' | head -1)
-          PASS=$(echo $PUBLISH_PROFILE | grep -oP '(?<=userPWD=")[^"]+' | head -1)
-          SCM_URL=$(echo $PUBLISH_PROFILE | grep -oP '(?<=publishUrl=")[^"]+' | head -1)
           JAR=$(ls target/*.jar | grep -v original | head -1)
-            
-          echo "SCM URL: $SCM_URL"
-           echo "Desplegando $JAR..."
-          
-          curl -X POST \
-            "https://$SCM_URL/api/onedeploy?type=jar" \
-            -u "$USER:$PASS" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @$JAR \
-            -w "\nHTTP Status: %{http_code}\n"
+          cp $JAR target/app.jar
+          echo "JAR listo: target/app.jar"
+
+      - name: Deploy via FTP
+        run: |
+          curl -T target/app.jar \
+            "ftps://waws-prod-bn1-253.ftp.azurewebsites.windows.net/site/wwwroot/app.jar" \
+            -u "${{ secrets.AZURE_FTP_USER }}:${{ secrets.AZURE_FTP_PASS }}" \
+            --ftp-ssl \
+            --ssl-no-revoke \
+            -v \
+            -w "\nFTP Status: %{http_code}\n"
