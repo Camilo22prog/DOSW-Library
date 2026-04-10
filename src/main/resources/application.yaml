@@ -4,14 +4,14 @@ spring:
     name: DOSW-Library
 
   profiles:
-    active: mongo  # ← Cambia a 'relational' para usar PostgreSQL
+    active: mongo
 
 jwt:
   secret: "dosw-library-super-secret-key-eci-colombia-noveno-semestre-2024"
   expiration: 86400000
 
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 springdoc:
   api-docs:
@@ -29,7 +29,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb+srv://juanmelo3243_db_user:TVkDoGPLxaL1Bpwy@cluster0.z6v8xet.mongodb.net/?appName=Cluster0
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb+srv://juanmelo3243_db_user:TVkDoGPLxaL1Bpwy@cluster0.z6v8xet.mongodb.net/?appName=Cluster0}
       database: dosw_library
 
   autoconfigure:

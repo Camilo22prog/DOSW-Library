@@ -171,17 +171,16 @@
                         <goals><goal>check</goal></goals>
                         <configuration>
                             <excludes>
-                                <exclude>**/controller/dto/**</exclude>
-                                <exclude>**/controller/mapper/**</exclude>
-                                <exclude>**/controller/BookController*</exclude>
-                                <exclude>**/controller/UserController*</exclude>
-                                <exclude>**/controller/LoanController*</exclude>
-                                <exclude>**/controller/handler/GlobalExceptionHandler*</exclude>
-                                <exclude>**/controller/SwaggerConfig*</exclude>
+                                <!-- Capa de presentación (controllers, DTOs, mappers) -->
+                                <exclude>**/controller/**</exclude>
+                                <!-- Clase principal de arranque -->
                                 <exclude>**/DoswLibraryApplication*</exclude>
-                                <exclude>**/persistence/entity/**</exclude>
-                                <exclude>**/persistence/mapper/**</exclude>
-                                <exclude>**/persistence/repository/**</exclude>
+                                <!-- Inicializador de datos (infraestructura) -->
+                                <exclude>**/MongoDataInitializer*</exclude>
+                                <!-- Configuración de Spring Security -->
+                                <exclude>**/security/SecurityConfig*</exclude>
+                                <!-- Capa de persistencia (JPA, MongoDB, mappers, entidades) -->
+                                <exclude>**/persistence/**</exclude>
                             </excludes>
                             <rules>
                                 <rule>
@@ -190,7 +189,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.30</minimum>
+                                            <minimum>0.80</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
