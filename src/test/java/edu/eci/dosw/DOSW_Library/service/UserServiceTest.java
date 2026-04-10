@@ -109,4 +109,17 @@ class UserServiceTest {
         when(userRepository.findById("NONE")).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class, () -> userService.getUserById("NONE"));
     }
+
+    @Test
+    void testGetUserByUsername_found() {
+        when(userRepository.findByUsername("alice"))
+                .thenReturn(Optional.of(buildUser("U1", "Alice", "alice", "p")));
+        assertEquals("U1", userService.getUserByUsername("alice").getId());
+    }
+
+    @Test
+    void testGetUserByUsername_notFound_throwsException() {
+        when(userRepository.findByUsername("nobody")).thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class, () -> userService.getUserByUsername("nobody"));
+    }
 }

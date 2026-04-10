@@ -4,7 +4,7 @@ spring:
     name: DOSW-Library
 
   profiles:
-    active: mongo  # ← Cambia a 'relational' para usar PostgreSQL
+    active: mongo
 
 jwt:
   secret: "dosw-library-super-secret-key-eci-colombia-noveno-semestre-2024"
